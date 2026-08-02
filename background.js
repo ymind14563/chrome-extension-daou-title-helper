@@ -5,11 +5,12 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 // ===== 강제 주입: 크롬 첫 시작/탭 복원 시 content script가 안 붙는 문제 해결 =====
-const CAL_URL = "https://*.daouoffice.com/gw/app/calendar";
-
+function isCalUrl(url) {
+  return /^https:\/\/[^/]+\.daouoffice\.com\/gw\/app\/calendar/.test(url || "");
+}
 // 해당 탭에 content script가 이미 있는지 확인 후 없으면 주입
 async function ensureInjected(tabId, url) {
-  if (!url || !url.startsWith(CAL_URL)) return;
+  if (!url || !isCalUrl(url)) return;
   try {
     // 이미 로드됐는지 확인 (전역 플래그 체크)
     const [res] = await chrome.scripting.executeScript({
@@ -33,14 +34,14 @@ chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
 
 // 크롬 시작 시 이미 열려있는 모든 캘린더 탭에 주입
 chrome.runtime.onStartup.addListener(() => {
-  chrome.tabs.query({ url: CAL_URL + "*" }, (tabs) => {
+  chrome.tabs.query({url: "https://*.daouoffice.com/gw/app/calendar*"}, (tabs) => {
     tabs.forEach((t) => t.id && ensureInjected(t.id, t.url));
   });
 });
 
 // 확장 설치/업데이트 직후에도 주입
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.tabs.query({ url: CAL_URL + "*" }, (tabs) => {
+  chrome.tabs.query({url: "https://*.daouoffice.com/gw/app/calendar*"}, (tabs) => {
     tabs.forEach((t) => t.id && ensureInjected(t.id, t.url));
   });
 });
