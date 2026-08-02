@@ -5,7 +5,7 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 // ===== 강제 주입: 크롬 첫 시작/탭 복원 시 content script가 안 붙는 문제 해결 =====
-const CAL_URL = "https://daonhns.daouoffice.com/gw/app/calendar";
+const CAL_URL = "https://*.daouoffice.com/gw/app/calendar";
 
 // 해당 탭에 content script가 이미 있는지 확인 후 없으면 주입
 async function ensureInjected(tabId, url) {

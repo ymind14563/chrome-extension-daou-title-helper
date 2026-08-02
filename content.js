@@ -10,7 +10,7 @@
 
   const TITLE_SELECTOR    = 'input.ipt_tit[name="summary"]';
   const LOCATION_SELECTOR = '#form-field-location[name="location"]';
-  const ROOT_ID  = "daon-title-helper";
+  const ROOT_ID  = "schedule-title-helper";
   const PANEL_ID = "dth-panel";
   const FAB_ID   = "dth-fab";
 
