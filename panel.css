@@ -113,8 +113,9 @@
 #schedule-title-helper .dth-info:focus .dth-tip { visibility: visible; opacity: 1; }
 
 #schedule-title-helper .dth-credit {
+  display: flex;
+  justify-content: space-between;
   margin-top: 10px;
-  text-align: right;
   font-size: 13px;
   color: #aab2bd;
 }

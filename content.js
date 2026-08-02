@@ -90,7 +90,7 @@
     if (p === "외부")  return "예: [외부] ○○본사 ○○구축사업 착수 미팅 (강남)";
     if (p === "회의실") return "예: [회의실] ○○구축사업 착수 회의";
     if (p === "내부")  return "예: [내부] ○○구축사업 착수 작업";
-    return "예: 구분을 선택하세요";
+    return "구분을 선택하세요";
   }
   function locTooltip() {
     return resolvePlace() === "외부"
@@ -143,7 +143,10 @@
           </div>
           <div class="dth-msg"></div>
         </div>
-        <div class="dth-credit">created by S</div>
+          <div class="dth-credit">
+            <span>v1.0.0</span>
+            <span>created by S</span>
+          </div>
       </div>
     `;
   }
