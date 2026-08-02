@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "일정 제목 생성기",
+  "version": "1.0.0",
+  "description": "일정 등록 시 제목 표준화 및 자동 입력",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "제목 생성기 켜기/끄기",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": ["scripting"],
+  "host_permissions": ["https://daonhns.daouoffice.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://daonhns.daouoffice.com/gw/app/calendar*"],
+      "js": ["content.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

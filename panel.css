@@ -1,0 +1,120 @@
+/* ===== FAB (우측 하단 원형 버튼) ===== */
+#daon-title-helper #dth-fab {
+  position: fixed;
+  right: 40px; bottom: 40px;
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #0ca678, #2f6fd6);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(20,120,150,0.4);
+  z-index: 2147483647;
+  transition: transform .12s, box-shadow .12s;
+}
+#daon-title-helper #dth-fab svg { width: 38px; height: 38px; display: block; }
+#daon-title-helper #dth-fab:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 26px rgba(20,120,150,0.5); }
+
+/* ===== 패널 (FAB 위로 펼쳐짐) ===== */
+#daon-title-helper #dth-panel {
+  position: fixed;
+  right: 40px; bottom: 124px;
+  width: 392px !important;
+  box-sizing: border-box !important;
+  padding: 18px 20px !important;
+  border: 1px solid #d5d9e0;
+  border-radius: 14px;
+  background: #f7f9fc;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: 14px; color: #222;
+  z-index: 2147483647;
+}
+#daon-title-helper #dth-panel * { box-sizing: border-box !important; }
+
+#daon-title-helper .dth-head { display: flex !important; align-items: center !important; gap: 6px !important; margin-bottom: 16px !important; }
+#daon-title-helper .dth-head b { font-size: 13px; }
+#daon-title-helper .dth-head .dth-tag {
+  font-size: 11px; color: #5a6474; background: #e6ebf2; padding: 1px 7px; border-radius: 999px;
+}
+#daon-title-helper .dth-close {
+  margin-left: auto; border: 1px solid #cfd5df; background: #fff;
+  width: 24px; height: 24px; border-radius: 6px; cursor: pointer; font-size: 11px; color: #5a6474; line-height: 1;
+}
+#daon-title-helper .dth-close:hover { border-color: #c0392b; color: #c0392b; }
+
+#daon-title-helper .dth-row { display: flex; align-items: flex-start !important; gap: 12px !important; margin-bottom: 13px !important; }
+
+/* 조건부 행 기본 숨김 (JS가 구분 선택에 따라 표시) */
+#daon-title-helper .dth-room-row,
+#daon-title-helper .dth-place-row,
+#daon-title-helper .dth-region-row { display: none; }
+#daon-title-helper .dth-row > .dth-label { flex: 0 0 66px; padding-top: 7px; font-weight: 600; color: #444; font-size: 13px; }
+#daon-title-helper .dth-opts { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+
+#daon-title-helper button.dth-chip {
+  display: inline-flex; align-items: center; padding: 6px 13px;
+  border: 1px solid #cfd5df; border-radius: 999px; background: #fff;
+  cursor: pointer; user-select: none; line-height: 1.2; font-size: 13px;
+  color: #333; font-family: inherit;
+}
+#daon-title-helper button.dth-chip:hover { border-color: #8aa0c0; }
+#daon-title-helper button.dth-chip.dth-on { background: #2f6fd6; border-color: #2f6fd6; color: #fff; font-weight: 600; }
+
+#daon-title-helper input.dth-input {
+  flex: 1; padding: 8px 11px; border: 1px solid #cfd5df;
+  border-radius: 8px; font-size: 14px; outline: none; background: #fff;
+}
+#daon-title-helper input.dth-input:focus { border-color: #2f6fd6; }
+#daon-title-helper input.dth-input::placeholder { color: #aab2bd; }
+
+#daon-title-helper .dth-foot {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 12px; padding-top: 12px; border-top: 1px dashed #d5d9e0;
+}
+#daon-title-helper .dth-preview {
+  flex: 1; padding: 8px 10px; background: #fff; border: 1px solid #e0e4ea;
+  border-radius: 8px; font-family: monospace; font-size: 13px; color: #1a3c6e;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#daon-title-helper .dth-preview.dth-empty { color: #aaa; }
+#daon-title-helper button.dth-apply {
+  flex: 0 0 auto; padding: 8px 16px; border: none; border-radius: 8px;
+  background: #2f6fd6; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+#daon-title-helper button.dth-apply:hover { background: #245bb5; }
+#daon-title-helper button.dth-apply:disabled { background: #b9c2cf; cursor: not-allowed; }
+#daon-title-helper .dth-msg { margin-top: 8px; font-size: 12px; min-height: 15px; }
+
+/* ===== v: 미리보기 라벨 ===== */
+#daon-title-helper .dth-foot-wrap { margin-top: 15px !important; padding-top: 15px !important; border-top: 1px dashed #d5d9e0; }
+#daon-title-helper .dth-preview-label { font-size: 12px; font-weight: 700; color: #5a6474; margin-bottom: 6px; }
+#daon-title-helper .dth-foot { display: flex; align-items: center; gap: 10px; margin-top: 0; padding-top: 0; border-top: none; }
+
+/* ===== v: 툴팁 (ⓘ) ===== */
+#daon-title-helper .dth-info {
+  position: relative; display: inline-flex; cursor: help;
+  color: #8aa0c0; font-size: 11px; margin-left: 2px;
+}
+#daon-title-helper .dth-info .dth-tip {
+  visibility: hidden; opacity: 0; transition: opacity .12s;
+  position: absolute; left: 50%; bottom: 145%; transform: translateX(-50%);
+  width: 190px; padding: 7px 9px; border-radius: 7px;
+  background: #2b3444; color: #fff; font-size: 11px; line-height: 1.4; font-weight: 400;
+  z-index: 10; white-space: normal; text-align: left;
+  box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+#daon-title-helper .dth-info .dth-tip::after {
+  content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: #2b3444;
+}
+#daon-title-helper .dth-info:hover .dth-tip,
+#daon-title-helper .dth-info:focus .dth-tip { visibility: visible; opacity: 1; }
+
+#daon-title-helper .dth-credit {
+  margin-top: 10px;
+  text-align: right;
+  font-size: 13px;
+  color: #aab2bd;
+}
