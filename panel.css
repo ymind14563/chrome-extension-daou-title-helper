@@ -64,7 +64,7 @@
 
 #schedule-title-helper input.dth-input {
   flex: 1; padding: 8px 11px; border: 1px solid #cfd5df;
-  border-radius: 8px; font-size: 14px; outline: none; background: #fff;
+  border-radius: 8px; font-size: 14px; outline: none; background: #fff; color: #222;
 }
 #schedule-title-helper input.dth-input:focus { border-color: #2f6fd6; }
 #schedule-title-helper input.dth-input::placeholder { color: #aab2bd; }
