@@ -14,6 +14,9 @@
   const PANEL_ID = "dth-panel";
   const FAB_ID   = "dth-fab";
 
+  // 킬스위치: alive.json의 enabled 값으로 판단
+  const ALIVE_CHECK_URL = "https://raw.githubusercontent.com/ymind14563/chrome-extension-daou-title-helper/main/alive.json";
+
   // 상태
   // scope: "내부"|"외부"|null,  room: true|false|null (내부일 때만),  type: 문자열|null
   const state = { scope: null, room: null, placeName: "", dept: "", subject: "", type: "회의", region: "" };
@@ -371,5 +374,17 @@
       bo.observe(document.documentElement, { childList: true });
     }
   }
-  boot();
+  (async () => {
+    try {
+      const res = await fetch(ALIVE_CHECK_URL, { cache: "no-store", signal: AbortSignal.timeout(5000) });
+      if (!res.ok) return; // 파일 삭제/private → JSON 없음, 조용히 정지
+      const data = await res.json();
+      const alive = data && (data.enabled === true || data.enabled === "true");
+      if (alive) { boot(); return; }
+      if (data.message && !sessionStorage.getItem("dth-stop-shown")) {
+        sessionStorage.setItem("dth-stop-shown", "1"); // 세션당 1번
+        alert(data.message);                            // 문구는 전부 alive.json에서
+      }
+    } catch (e) {} // 네트워크 실패 → 조용히 정지
+  })();
 })();
