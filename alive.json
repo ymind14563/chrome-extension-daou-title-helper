@@ -1,4 +1,4 @@
 {
-  "enabled": true,
+  "enabled": false,
   "message": "임시 배포판 사용이 종료되었습니다. 크롬 웹스토어에서 정식 버전을 설치해주세요."
 }
