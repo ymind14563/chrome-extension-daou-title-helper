@@ -2,11 +2,11 @@
   "use strict";
   if (window.__dthLoaded) return;   // 중복 주입 방지
   window.__dthLoaded = true;
-  console.log("[제목생성기] content script 로드됨", location.href);
+  // console.log("[제목생성기] content script 로드됨", location.href);
 
   // ===== enum =====
-  const TYPES = ["회의", "미팅", "출장", "작업", "점검", "인증", "행사", "교육", "면접", "기타"];
-  const MEETING_ROOM_VALUE = "본사회의실";
+  const TYPES = ["회의", "미팅", "출장", "작업", "점검", "인증", "행사", "교육", "면접", "방문", "발표", "확인", "마감"];
+  const MEETING_ROOM_VALUE = "본사 회의실";
 
   const TITLE_SELECTOR    = 'input.ipt_tit[name="summary"]';
   const LOCATION_SELECTOR = '#form-field-location[name="location"]';
@@ -14,8 +14,8 @@
   const PANEL_ID = "dth-panel";
   const FAB_ID   = "dth-fab";
 
-  // 킬스위치: alive.json의 enabled 값으로 판단
-  const ALIVE_CHECK_URL = "https://raw.githubusercontent.com/ymind14563/chrome-extension-daou-title-helper/main/alive.json";
+  // // 킬스위치: alive.json의 enabled 값으로 판단
+  // const ALIVE_CHECK_URL = "https://raw.githubusercontent.com/ymind14563/chrome-extension-daou-title-helper/main/alive.json";
 
   // 상태
   // scope: "내부"|"외부"|null,  room: true|false|null (내부일 때만),  type: 문자열|null
@@ -24,6 +24,7 @@
 
   function resolvePlace() {
     if (state.scope === "외부") return "외부";
+    if (state.scope === "일정체크") return "일정체크";
     if (state.scope === "내부") {
       if (state.room === true) return "회의실";
       if (state.room === false) return "내부";
@@ -36,7 +37,7 @@
     const place = resolvePlace();
     if (!place) return "";
     const subj = state.subject.trim();
-    if (!subj) return "";
+    // if (!subj) return "";
     const type = state.type || "";
     const dept = state.dept.trim();
     if (place === "외부") {
@@ -51,13 +52,17 @@
 
   function locationFieldValue() {
     const place = resolvePlace();
-    if (place === "회의실") return MEETING_ROOM_VALUE;
+    // state.room = true일 때만 회의실로 입력, 외부는 장소명(지역)으로 입력, 내부는 비워둠
+    if (state.room === true) return MEETING_ROOM_VALUE;
+    // if (place === "회의실") return MEETING_ROOM_VALUE;
+    // if (place === "일정체크") return MEETING_ROOM_VALUE;
+
     const pn = state.placeName.trim();
     if (place === "외부") {
       const rg = state.region.trim();
       return pn + (rg ? `(${rg})` : "");
     }
-    return pn; // 내부
+    return pn; // 내부, 일정체크
   }
 
   function fillInput(selector, value) {
@@ -72,8 +77,9 @@
   function applyToForm() {
     if (!document.querySelector(TITLE_SELECTOR)) return { ok: false, reason: "일정 등록 폼에서 사용하세요" };
     if (!resolvePlace()) return { ok: false, reason: "구분을 선택하세요" };
+    if (!state.dept.trim()) return { ok: false, reason: "사업명/부서명을 입력하세요" };
     const title = buildTitle();
-    if (!title) return { ok: false, reason: "주제를 입력하세요" };
+    if (!title) return { ok: false, reason: "생성될 제목이 완성되지 않았습니다" };
     const t = fillInput(TITLE_SELECTOR, title);
     const locVal = locationFieldValue();
     if (locVal) fillInput(LOCATION_SELECTOR, locVal);
@@ -83,22 +89,35 @@
   // ===== 구분별 공식/예시/툴팁 =====
   function formulaText() {
     const p = resolvePlace();
-    if (p === "외부")  return "[외부] 장소명 + 사업/부서명 + 주제 + 성격 (지역)";
-    if (p === "회의실") return "[회의실] 사업/부서명 + 주제 + 성격";
-    if (p === "내부")  return "[내부] 사업/부서명 + 주제 + 성격";
-    return "[구분] 사업/부서명 + 주제 + 성격";
+    if (p === "외부")  return "[외부] 장소명 + 사업명/부서명 + 주제 + 성격 (지역)";
+    if (p === "회의실") return "[회의실] 사업명/부서명 + 주제 + 성격";
+    if (p === "내부")  return "[내부] 사업명/부서명 + 주제 + 성격";
+    if (p === "일정체크") return "[일정체크] 사업명/부서명 + 주제 + 성격";
+    return "[구분] 사업명/부서명 + 주제 + 성격";
   }
   function exampleText() {
     const p = resolvePlace();
     if (p === "외부")  return "예: [외부] ○○본사 ○○구축사업 착수 미팅 (강남)";
     if (p === "회의실") return "예: [회의실] ○○구축사업 착수 회의";
     if (p === "내부")  return "예: [내부] ○○구축사업 착수 작업";
+    if (p === "일정체크") return "예: [일정체크] ○○구축사업 서류 제출 마감";
     return "구분을 선택하세요";
   }
   function locTooltip() {
-    return resolvePlace() === "외부"
-      ? "제목과 다우오피스 장소 필드에 '장소(지역)' 형태로 입력됩니다"
-      : "다우오피스 장소 필드에만 입력됩니다 (제목 미표시)";
+    const place = resolvePlace();
+    if (place === "외부") {
+      return "제목 앞에 [외부]가 붙고, 다우오피스 장소 필드에는 '장소(지역)' 형식으로 입력됩니다";
+    }
+    if (place === "회의실") {
+      return "제목 앞에 [회의실]이 붙고, 다우오피스 장소 필드에는 '본사 회의실'이 입력됩니다";
+    }
+    if (place === "내부") {
+      return "제목 앞에 [내부]가 붙고, 다우오피스 장소 필드에는 장소명이 입력됩니다";
+    }
+    if (place === "일정체크") {
+      return "제목 앞에 [일정체크]가 붙고, 다우오피스 장소 필드에는 별도 값이 입력됩니다";
+    }
+    return "구분을 선택하면 제목과 장소 입력 방식이 표시됩니다";
   }
 
   // ===== 패널 HTML =====
@@ -115,11 +134,11 @@
           <div class="dth-opts" data-group="scope"></div>
         </div>
         <div class="dth-row dth-room-row">
-          <span class="dth-label">회의실 <span class="dth-info" tabindex="0">ⓘ<span class="dth-tip dth-room-tip"></span></span></span>
+          <span class="dth-label">회의실 <span class="dth-info" tabindex="0">ℹ<span class="dth-tip dth-room-tip"></span></span></span>
           <div class="dth-opts" data-group="room"></div>
         </div>
         <div class="dth-row dth-place-row">
-          <span class="dth-label">장소명 <span class="dth-info" tabindex="0">ⓘ<span class="dth-tip dth-place-tip"></span></span></span>
+          <span class="dth-label">장소명 <span class="dth-info" tabindex="0">ℹ<span class="dth-tip dth-place-tip"></span></span></span>
           <input type="text" class="dth-input dth-placename" placeholder="예: ○○본사, ○○구청, ○○호텔">
         </div>
         <div class="dth-row dth-region-row">
@@ -127,12 +146,12 @@
           <input type="text" class="dth-input dth-region" placeholder="예: 강남, 종로, 대전, 일본">
         </div>
         <div class="dth-row">
-          <span class="dth-label">사업/부서명</span>
-          <input type="text" class="dth-input dth-dept" placeholder="예: ○○구축사업, ○○부">
+          <span class="dth-label">사업명/부서명</span>
+          <input type="text" class="dth-input dth-dept" placeholder="예: ○○구축사업, ○○부 (필수값)">
         </div>
         <div class="dth-row">
           <span class="dth-label">주제</span>
-          <input type="text" class="dth-input dth-subject" placeholder="예: 착수, 정기점검 대응">
+          <input type="text" class="dth-input dth-subject" placeholder="예: 착수, 정기점검 대응 (필수값 아님)">
         </div>
         <div class="dth-row">
           <span class="dth-label">성격</span>
@@ -147,7 +166,7 @@
           <div class="dth-msg"></div>
         </div>
           <div class="dth-credit">
-            <span>v1.0.0</span>
+            <span>v1.0.2</span>
             <span>created by S</span>
           </div>
       </div>
@@ -173,8 +192,15 @@
     const typeBox  = panel.querySelector('.dth-opts[data-group="type"]');
 
     // 칩 채우기
-    scopeBox.append(makeChip("scope","내부","내부", state.scope==="내부"), makeChip("scope","외부","외부", state.scope==="외부"));
-    roomBox.append(makeChip("room","y","사용", state.room===true), makeChip("room","n","미사용", state.room===false));
+    scopeBox.append(
+      makeChip("scope","내부","내부", state.scope==="내부"), 
+      makeChip("scope","외부","외부", state.scope==="외부"),
+      makeChip("scope","일정체크","일정체크", state.scope==="일정체크")
+    );
+    roomBox.append(
+      makeChip("room","y","사용", state.room===true), 
+      makeChip("room","n","미사용", state.room===false)
+    );
     TYPES.forEach(t => typeBox.append(makeChip("type", t, t, state.type===t)));
 
     const roomRow   = el(".dth-room-row");
@@ -186,19 +212,22 @@
     const msg       = el(".dth-msg");
     const placeTip  = el(".dth-place-tip");
     const roomTip   = el(".dth-room-tip");
+    const roomInfo  = el(".dth-room-row .dth-info");
     const placeInput  = el(".dth-placename");
     const regionInput = el(".dth-region");
 
     // 표시 갱신 (핵심)
     function render() {
       const place = resolvePlace();
-      const showRoom   = state.scope === "내부";
-      const showPlace  = (place === "내부" || place === "외부");
+      const showRoom   = state.scope === "내부" || state.scope === "일정체크";
+      const showPlace  = state.scope === "외부" || ((state.scope === "내부" || state.scope === "일정체크") && state.room === false);
       const showRegion = (place === "외부");
+      const showRoomInfo = showRoom && state.room !== null;
 
       roomRow.style.display   = showRoom ? "flex" : "none";
       placeRow.style.display  = showPlace ? "flex" : "none";
       regionRow.style.display = showRegion ? "flex" : "none";
+      if (roomInfo) roomInfo.style.display = showRoomInfo ? "inline-flex" : "none";
 
       // 안 보이는 필드 값 비우기
       if (!showPlace)  { state.placeName = ""; placeInput.value = ""; }
@@ -210,10 +239,24 @@
         ? "예: 근처 ○○카페, 휴게실, 창고, 옥상"
         : "예: ○○본사, ○○구청, ○○호텔";
       if (placeTip) placeTip.textContent = locTooltip();
-      if (roomTip)  roomTip.textContent  = "다우오피스 장소 필드에 '본사회의실'로 입력됩니다";
+      if (roomTip) {
+        if (state.scope === "일정체크" && state.room === true) {
+          roomTip.textContent = "제목은 [일정체크]로 표시되고, 다우오피스 장소 필드에는 '본사 회의실'이 입력됩니다";
+        } else if (state.scope === "일정체크" && state.room === false) {
+          roomTip.textContent = "제목은 [일정체크]로 표시되고, 다우오피스 장소 필드에는 별도 장소명이 입력됩니다";
+        } else if (state.scope === "내부" && state.room === true) {
+          roomTip.textContent = "제목은 [회의실]로 표시되고, 다우오피스 장소 필드에는 '본사 회의실'이 입력됩니다";
+        } else if (state.scope === "내부" && state.room === false) {
+          roomTip.textContent = "제목은 [내부]로 표시되고, 다우오피스 장소 필드에는 별도 장소명이 입력됩니다";
+        } else {
+          roomTip.textContent = "";
+        }
+      }
+      if (!showRoomInfo && roomTip) roomTip.textContent = "";
 
       const title = buildTitle();
-      if (title) {
+      const hasDept = !!state.dept.trim();
+      if (title && hasDept) {
         preview.textContent = title;
         preview.classList.remove("dth-empty");
         applyBtn.disabled = false;
@@ -275,8 +318,14 @@
     applyBtn.addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
       const r = applyToForm();
-      msg.style.color = r.ok ? "#1a7a3c" : "#c0392b";
-      msg.textContent = r.ok ? "입력 성공 (다우오피스에서 시간·참석자·내용 입력 후 확인버튼 클릭)" : r.reason;
+      if (r.ok) {
+        togglePanel(false);
+      } else {
+        msg.style.color = "#c0392b";
+        msg.textContent = r.reason;
+      }
+      // msg.style.color = r.ok ? "#1a7a3c" : "#c0392b";
+      // msg.textContent = r.ok ? "입력 성공 (다우오피스에서 시간·참석자·내용 입력 후 확인버튼 클릭)" : r.reason;
     });
     el(".dth-close").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); togglePanel(false); });
 
@@ -374,17 +423,18 @@
       bo.observe(document.documentElement, { childList: true });
     }
   }
-  (async () => {
-    try {
-      const res = await fetch(ALIVE_CHECK_URL, { cache: "no-store", signal: AbortSignal.timeout(5000) });
-      if (!res.ok) return; // 파일 삭제/private → JSON 없음, 조용히 정지
-      const data = await res.json();
-      const alive = data && (data.enabled === true || data.enabled === "true");
-      if (alive) { boot(); return; }
-      if (data.message && !sessionStorage.getItem("dth-stop-shown")) {
-        sessionStorage.setItem("dth-stop-shown", "1"); // 세션당 1번
-        alert(data.message);                            // 문구는 전부 alive.json에서
-      }
-    } catch (e) {} // 네트워크 실패 → 조용히 정지
-  })();
+  // (async () => {
+  //   try {
+  //     const res = await fetch(ALIVE_CHECK_URL, { cache: "no-store", signal: AbortSignal.timeout(5000) });
+  //     if (!res.ok) return; // 파일 삭제/private → JSON 없음, 조용히 정지
+  //     const data = await res.json();
+  //     const alive = data && (data.enabled === true || data.enabled === "true");
+  //     if (alive) { boot(); return; }
+  //     if (data.message && !sessionStorage.getItem("dth-stop-shown")) {
+  //       sessionStorage.setItem("dth-stop-shown", "1"); // 세션당 1번
+  //       alert(data.message);                            // 문구는 전부 alive.json에서
+  //     }
+  //   } catch (e) {} // 네트워크 실패 → 조용히 정지
+  // })();
+  boot();
 })();
