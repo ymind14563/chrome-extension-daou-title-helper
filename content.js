@@ -19,7 +19,7 @@
 
   // 상태
   // scope: "내부"|"외부"|null,  room: true|false|null (내부일 때만),  type: 문자열|null
-  const state = { scope: null, room: null, placeName: "", dept: "", subject: "", type: "회의", region: "" };
+  const state = { scope: null, room: null, placeName: "", dept: "", subject: "", type: null, region: "" };
   let panelOpen = false;
 
   function resolvePlace() {
@@ -120,56 +120,168 @@
     return "구분을 선택하면 제목과 장소 입력 방식이 표시됩니다";
   }
 
-  // ===== 패널 HTML =====
-  function panelInnerHTML() {
+  // ===== 패널 템플릿 / 설정 =====
+  const PANEL_COPY = {
+    title: "제목 생성기",
+    rows: {
+      scope: { label: "구분" },
+      room: { label: "회의실" },
+      place: { label: "장소명" },
+      region: { label: "지역" },
+      dept: { label: "사업명/부서명", placeholder: "예: ○○구축사업, ○○부 (필수값)" },
+      subject: { label: "주제", placeholder: "예: 착수, 정기점검 대응 (필수값 아님)" },
+      type: { label: "성격" },
+    },
+    preview: "미리보기",
+    apply: "적용",
+    version: "v1.1.1",
+    credit: "created by S",
+    notes: {
+      label: "패치노트 보기",
+      // title: "패치노트",
+      items: [
+        {
+          title: "v1.1.1",
+          items: [
+            "일정체크 기능 및 성격 칩 추가",
+            "설명 툴팁 문구 전체 수정",
+            "주제 필드 필수값 제외 처리",
+            "적용 버튼 클릭 시 패널 닫도록 수정",
+            "패치노트 패널 추가",
+          ],
+        },
+        {
+          title: "v1.0.1",
+          items: [
+            "예시 문장 내용 수정",
+            "글자 색상 조정",
+          ],
+        },
+        {
+          title: "v1.0.0",
+          items: [
+            "초기 릴리즈",
+          ],
+        },
+      ],
+    },
+  };
+
+  function panelHeadHTML() {
     return `
       <div class="dth-head">
-        <b>제목 생성기</b>
+        <b>${PANEL_COPY.title}</b>
         <span class="dth-tag dth-formula">[구분] 주제 성격</span>
         <button type="button" class="dth-close" title="닫기">✕</button>
       </div>
+    `;
+  }
+
+  function panelBodyHTML() {
+    return `
       <div class="dth-body">
-        <div class="dth-row">
-          <span class="dth-label">구분</span>
-          <div class="dth-opts" data-group="scope"></div>
-        </div>
-        <div class="dth-row dth-room-row">
-          <span class="dth-label">회의실 <span class="dth-info" tabindex="0">ℹ<span class="dth-tip dth-room-tip"></span></span></span>
-          <div class="dth-opts" data-group="room"></div>
-        </div>
-        <div class="dth-row dth-place-row">
-          <span class="dth-label">장소명 <span class="dth-info" tabindex="0">ℹ<span class="dth-tip dth-place-tip"></span></span></span>
-          <input type="text" class="dth-input dth-placename" placeholder="예: ○○본사, ○○구청, ○○호텔">
-        </div>
-        <div class="dth-row dth-region-row">
-          <span class="dth-label">지역</span>
-          <input type="text" class="dth-input dth-region" placeholder="예: 강남, 종로, 대전, 일본">
-        </div>
-        <div class="dth-row">
-          <span class="dth-label">사업명/부서명</span>
-          <input type="text" class="dth-input dth-dept" placeholder="예: ○○구축사업, ○○부 (필수값)">
-        </div>
-        <div class="dth-row">
-          <span class="dth-label">주제</span>
-          <input type="text" class="dth-input dth-subject" placeholder="예: 착수, 정기점검 대응 (필수값 아님)">
-        </div>
-        <div class="dth-row">
-          <span class="dth-label">성격</span>
-          <div class="dth-opts" data-group="type"></div>
-        </div>
-        <div class="dth-foot-wrap">
-          <div class="dth-preview-label">미리보기</div>
-          <div class="dth-foot">
-            <div class="dth-preview dth-empty"></div>
-            <button type="button" class="dth-apply" disabled>적용</button>
-          </div>
-          <div class="dth-msg"></div>
-        </div>
-          <div class="dth-credit">
-            <span>v1.0.2</span>
-            <span>created by S</span>
-          </div>
+        ${panelRowHTML(PANEL_COPY.rows.scope.label, '<div class="dth-opts" data-group="scope"></div>')}
+        ${panelRoomRowHTML()}
+        ${panelPlaceRowHTML()}
+        ${panelRegionRowHTML()}
+        ${panelInputRowHTML(PANEL_COPY.rows.dept.label, 'dth-dept', PANEL_COPY.rows.dept.placeholder)}
+        ${panelInputRowHTML(PANEL_COPY.rows.subject.label, 'dth-subject', PANEL_COPY.rows.subject.placeholder)}
+        ${panelRowHTML(PANEL_COPY.rows.type.label, '<div class="dth-opts" data-group="type"></div>')}
+        ${panelFooterHTML()}
       </div>
+    `;
+  }
+
+  function panelRowHTML(label, content) {
+    return `
+      <div class="dth-row">
+        <span class="dth-label">${label}</span>
+        ${content}
+      </div>
+    `;
+  }
+
+  function panelRoomRowHTML() {
+    return `
+      <div class="dth-row dth-room-row">
+        <span class="dth-label">${PANEL_COPY.rows.room.label} <span class="dth-info" tabindex="0">ℹ<span class="dth-tip dth-room-tip"></span></span></span>
+        <div class="dth-opts" data-group="room"></div>
+      </div>
+    `;
+  }
+
+  function panelPlaceRowHTML() {
+    return `
+      <div class="dth-row dth-place-row">
+        <span class="dth-label">${PANEL_COPY.rows.place.label} <span class="dth-info" tabindex="0">ℹ<span class="dth-tip dth-place-tip"></span></span></span>
+        <input type="text" class="dth-input dth-placename" placeholder="예: ○○본사, ○○구청, ○○호텔">
+      </div>
+    `;
+  }
+
+  function panelRegionRowHTML() {
+    return `
+      <div class="dth-row dth-region-row">
+        <span class="dth-label">${PANEL_COPY.rows.region.label}</span>
+        <input type="text" class="dth-input dth-region" placeholder="예: 강남, 종로, 대전, 일본">
+      </div>
+    `;
+  }
+
+  function panelInputRowHTML(label, inputClass, placeholder) {
+    return `
+      <div class="dth-row">
+        <span class="dth-label">${label}</span>
+        <input type="text" class="dth-input ${inputClass}" placeholder="${placeholder}">
+      </div>
+    `;
+  }
+
+  function panelFooterHTML() {
+    return `
+      <div class="dth-foot-wrap">
+        <div class="dth-preview-label">${PANEL_COPY.preview}</div>
+        <div class="dth-foot">
+          <div class="dth-preview dth-empty"></div>
+          <button type="button" class="dth-apply" disabled>${PANEL_COPY.apply}</button>
+        </div>
+        <div class="dth-msg"></div>
+      </div>
+      <div class="dth-footer-meta">
+        <div class="dth-credit">
+          <div class="dth-version-wrap">
+            <span>${PANEL_COPY.version}</span>
+            <button type="button" class="dth-notes-toggle" aria-expanded="false">${PANEL_COPY.notes.label}</button>
+          </div>
+          <span>${PANEL_COPY.credit}</span>
+        </div>
+        <div class="dth-notes" hidden>
+          <!-- <div class="dth-notes-title">${PANEL_COPY.notes.title}</div> -->
+          <ul class="dth-notes-list">
+            ${PANEL_COPY.notes.items.map((item) => {
+              const title = typeof item === "string" ? item : item.title;
+              const subItems = Array.isArray(item && item.items) ? item.items : [];
+              return `
+                <li class="dth-note-item">
+                  <span class="dth-note-title">${title}</span>
+                  ${subItems.length ? `
+                    <ul class="dth-note-sublist">
+                      ${subItems.map((sub) => `<li>${sub}</li>`).join("")}
+                    </ul>
+                  ` : ""}
+                </li>
+              `;
+            }).join("")}
+          </ul>
+        </div>
+      </div>
+    `;
+  }
+
+  function panelInnerHTML() {
+    return `
+      ${panelHeadHTML()}
+      ${panelBodyHTML()}
     `;
   }
 
@@ -328,6 +440,17 @@
       // msg.textContent = r.ok ? "입력 성공 (다우오피스에서 시간·참석자·내용 입력 후 확인버튼 클릭)" : r.reason;
     });
     el(".dth-close").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); togglePanel(false); });
+
+    const notesToggle = el(".dth-notes-toggle");
+    const notesBox = el(".dth-notes");
+    if (notesToggle && notesBox) {
+      notesToggle.addEventListener("click", (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const open = notesBox.hidden;
+        notesBox.hidden = !open;
+        notesToggle.setAttribute("aria-expanded", String(open));
+      });
+    }
 
     // 값 복원
     placeInput.value = state.placeName;
