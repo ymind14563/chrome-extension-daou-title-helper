@@ -24,7 +24,10 @@
 
   function resolvePlace() {
     if (state.scope === "외부") return "외부";
-    if (state.scope === "일정체크") return "일정체크";
+    if (state.scope === "일정체크") {
+      if (state.room === true) return "회의실";
+      if (state.room === false) return "일정체크";
+    }
     if (state.scope === "내부") {
       if (state.room === true) return "회의실";
       if (state.room === false) return "내부";
@@ -52,7 +55,7 @@
 
   function locationFieldValue() {
     const place = resolvePlace();
-    // state.room = true일 때만 회의실로 입력, 외부는 장소명(지역)으로 입력, 내부는 비워둠
+    // state.room = true일 때만 회의실로 입력, // 외부는 장소명(지역), 내부/일정체크는 장소명으로 입력
     if (state.room === true) return MEETING_ROOM_VALUE;
     // if (place === "회의실") return MEETING_ROOM_VALUE;
     // if (place === "일정체크") return MEETING_ROOM_VALUE;
@@ -112,10 +115,10 @@
       return "제목 앞에 [회의실]이 붙고, 다우오피스 장소 필드에는 '본사 회의실'이 입력됩니다";
     }
     if (place === "내부") {
-      return "제목 앞에 [내부]가 붙고, 다우오피스 장소 필드에는 장소명이 입력됩니다";
+      return "제목 앞에 [내부]가 붙고, 다우오피스 장소 필드에는 '장소명'이 입력됩니다";
     }
     if (place === "일정체크") {
-      return "제목 앞에 [일정체크]가 붙고, 다우오피스 장소 필드에는 별도 값이 입력됩니다";
+      return "제목 앞에 [일정체크]가 붙고, 다우오피스 장소 필드에는 '장소명'이 입력됩니다";
     }
     return "구분을 선택하면 제목과 장소 입력 방식이 표시됩니다";
   }
@@ -134,12 +137,18 @@
     },
     preview: "미리보기",
     apply: "적용",
-    version: "v1.1.1",
+    version: "v1.1.2",
     credit: "created by S",
     notes: {
       label: "패치노트 보기",
       // title: "패치노트",
       items: [
+        {
+          title: "v1.1.2",
+          items: [
+            "일정체크 선택 시 회의실 사용 여부에 따라 제목과 장소 입력 방식 자동 적용",
+          ],
+        },
         {
           title: "v1.1.1",
           items: [
@@ -353,13 +362,13 @@
       if (placeTip) placeTip.textContent = locTooltip();
       if (roomTip) {
         if (state.scope === "일정체크" && state.room === true) {
-          roomTip.textContent = "제목은 [일정체크]로 표시되고, 다우오피스 장소 필드에는 '본사 회의실'이 입력됩니다";
+          roomTip.textContent = "제목은 [회의실]로 표시되고, 다우오피스 장소 필드에는 '본사 회의실'이 입력됩니다";
         } else if (state.scope === "일정체크" && state.room === false) {
-          roomTip.textContent = "제목은 [일정체크]로 표시되고, 다우오피스 장소 필드에는 별도 장소명이 입력됩니다";
+          roomTip.textContent = "제목은 [일정체크]로 표시되고, 다우오피스 장소 필드에는 '장소명'이 입력됩니다";
         } else if (state.scope === "내부" && state.room === true) {
           roomTip.textContent = "제목은 [회의실]로 표시되고, 다우오피스 장소 필드에는 '본사 회의실'이 입력됩니다";
         } else if (state.scope === "내부" && state.room === false) {
-          roomTip.textContent = "제목은 [내부]로 표시되고, 다우오피스 장소 필드에는 별도 장소명이 입력됩니다";
+          roomTip.textContent = "제목은 [내부]로 표시되고, 다우오피스 장소 필드에는 '장소명'이 입력됩니다";
         } else {
           roomTip.textContent = "";
         }
